@@ -1,0 +1,16 @@
+{
+  "assistantId": "asst_32AELygiZmfai7WpaWqlVTal",
+  "name": "Helper",
+  "instructions": "you are helpful assistant.",
+  "tools": [
+    {
+      "type": "retrieval"
+    }
+  ],
+  "model": "gpt-4-1106-preview",
+  "file_ids": [
+    "file-mPVxMyoyxhwaE8WGFgtsiKVR",
+    "file-Bc3GoytqpcpNI3IAJddsudcT",
+    "file-LMbudtrsybhZCFFjfkOmOVIS"
+  ]
+}
