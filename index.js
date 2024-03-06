@@ -204,6 +204,112 @@ app.post("/createMessage/:threadId", async (req, res) => {
   }
 });
 
+//create message with files multipart/form-data
+app.post(
+  "/createMessageWithFiles/:threadId",
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      console.log("file", req.file.path);
+      const assistantDetails = await getOrCreateAssistant();
+      const file = await openai.files.create({
+        file: fs.createReadStream(req.file.path),
+        purpose: "assistants",
+      });
+      const threadMessages = await openai.beta.threads.messages.create(
+        req.params.threadId,
+        {
+          role: "user",
+          content:
+            "Tell the User this -> 'The file is uploaded. You can ask me anything about the file.' ..and add something about the file.",
+          file_ids: [file.id],
+        }
+      );
+      console.log(threadMessages.content);
+      const run = await openai.beta.threads.runs.create(req.params.threadId, {
+        assistant_id: "asst_32AELygiZmfai7WpaWqlVTal",
+      });
+      let runStatus = await openai.beta.threads.runs.retrieve(
+        req.params.threadId,
+        run.id
+      );
+      while (runStatus.status !== "completed") {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        runStatus = await openai.beta.threads.runs.retrieve(
+          req.params.threadId,
+          run.id
+        );
+      }
+      const messages = await openai.beta.threads.messages.list(
+        req.params.threadId
+      );
+      const lastMessageForRun = messages.data
+        .filter(
+          (message) => message.run_id === run.id && message.role === "assistant"
+        )
+        .pop();
+
+      if (lastMessageForRun) {
+        res.json({ response: lastMessageForRun.content[0].text.value });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("An error occurred during file upload");
+    }
+  }
+);
+
+app.post(
+  "/createFirstMessageWithFiles",
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const assistantDetails = await getOrCreateAssistant();
+      const file = await openai.files.create({
+        file: fs.createReadStream(req.file.path),
+        purpose: "assistants",
+      });
+      const thread = await openai.beta.threads.create();
+      const threadMessages = await openai.beta.threads.messages.create(
+        thread.id,
+        {
+          role: "user",
+          content:
+            "tell your name is ChatPly and say something about the file.",
+          file_ids: [file.id],
+        }
+      );
+      const run = await openai.beta.threads.runs.create(thread.id, {
+        assistant_id: "asst_32AELygiZmfai7WpaWqlVTal",
+      });
+      let runStatus = await openai.beta.threads.runs.retrieve(
+        thread.id,
+        run.id
+      );
+      while (runStatus.status !== "completed") {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
+      }
+      const messages = await openai.beta.threads.messages.list(thread.id);
+      const lastMessageForRun = messages.data
+        .filter(
+          (message) => message.run_id === run.id && message.role === "assistant"
+        )
+        .pop();
+
+      if (lastMessageForRun) {
+        res.json({
+          response: lastMessageForRun.content[0].text.value,
+          threadId: thread.id,
+        });
+      }
+    } catch (error) {
+      console.error("Error in /createFirstMessage:", error);
+      res.status(500).send("An error occurred during file upload");
+    }
+  }
+);
+
 // POST endpoint for file upload
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
