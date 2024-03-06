@@ -175,6 +175,7 @@ app.post("/createMessage/:threadId", async (req, res) => {
     const run = await openai.beta.threads.runs.create(req.params.threadId, {
       assistant_id: "asst_32AELygiZmfai7WpaWqlVTal",
     });
+    
     let runStatus = await openai.beta.threads.runs.retrieve(
       req.params.threadId,
       run.id
