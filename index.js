@@ -11,6 +11,14 @@ require("dotenv").config();
 // Initialize Express app
 const app = express();
 app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 // process.env.OPENAI_API_KEY
 // Initialize OpenAI
@@ -175,7 +183,7 @@ app.post("/createMessage/:threadId", async (req, res) => {
     const run = await openai.beta.threads.runs.create(req.params.threadId, {
       assistant_id: "asst_32AELygiZmfai7WpaWqlVTal",
     });
-    
+
     let runStatus = await openai.beta.threads.runs.retrieve(
       req.params.threadId,
       run.id
