@@ -1,12 +1,12 @@
 {
-  "name": "chatgpt-api",
+  "name": "chat-ply-api",
   "version": "1.0.0",
   "description": "Custom chatGPT api for making api calls to chatgpt.it support both ChatGPt 3.5 and GPT4.",
   "main": "index.js",
   "scripts": {
     "start": "nodemon app.js"
   },
-  "author": "rahees ahmed",
+  "author": "Abir Kolin",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.20.2",
